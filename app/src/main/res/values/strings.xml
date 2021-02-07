@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">KryTez Share</string>
+    <string name="enter_host_ip_adress">Enter host ip adress</string>
+    <string name="enter_port_number">Enter port number</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="enter_user_id">Enter User Id</string>
+</resources>
