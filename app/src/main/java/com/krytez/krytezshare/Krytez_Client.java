@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -103,12 +104,12 @@ public class Krytez_Client extends AppCompatActivity {
                  port =Integer.parseInt(portt.getText().toString());
                 transd=0;
                 maintrans=0;
+                socket = new Socket(ipadd, port);
+                br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                BufferedOutputStream bo = new BufferedOutputStream(socket.getOutputStream());
+                PrintWriter pw = new PrintWriter(bo, true);
                 while(true) {
-                    socket = new Socket(ipadd, port);
                     initflag=true;
-                    br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    BufferedOutputStream bo = new BufferedOutputStream(socket.getOutputStream());
-                    PrintWriter pw = new PrintWriter(bo, true);
                     file = br.readLine();
 
                     if (file.equals("Finished"))
@@ -126,8 +127,12 @@ public class Krytez_Client extends AppCompatActivity {
                         dirTrav(path,file);
                         continue;
                     }
+                   String filedata[]=file.split(" ");
+                   long filelen=Long.parseLong(filedata[0]);
+                   file=file.substring(filedata[0].length());
+                   long transferred=0;
                     File f = new File(path,file);
-                    byte[] buff = new byte[1024000];
+                    byte[] buff = new byte[32768];
                     int len;
 
                     int i=0;
@@ -153,10 +158,18 @@ public class Krytez_Client extends AppCompatActivity {
                         });
                     }
                     BufferedInputStream is = new BufferedInputStream(socket.getInputStream());
-                    OutputStream fos= getContentResolver().openOutputStream(Uri.fromFile(f));
+                    FileOutputStream fos= new FileOutputStream(f);
                     publishProgress(file);
                     pw.println("done again");
-                    while ((len = is.read(buff,0,1024)) != -1) {
+                    if(filelen==0)
+                    {
+
+                        fos.flush();
+                        pw.println("received");
+                        publishProgress(file);
+                        continue;
+                    }
+                    while (((len = is.read(buff)) != -1)) {
                        fos.write(buff, 0, len);
                        fos.flush();
                         transd+=len;
@@ -166,6 +179,9 @@ public class Krytez_Client extends AppCompatActivity {
                             publishProgress(file);
                             transd=0;
                         }
+                        transferred+=len;
+                        if(transferred==filelen)
+                            break;
 
                     }
                     fos.flush();
@@ -239,6 +255,7 @@ public class Krytez_Client extends AppCompatActivity {
                 if(time>=1) {
                     dialog= new AlertDialog.Builder(Krytez_Client.this);
                     dialog.setTitle("DONE!");
+                    dialog.setCancelable(false);
                     dialog.setMessage("Transfer successful!\nAverage transfer speed: "+rate+"MBps");
                     dialog.setPositiveButton("Roger that!", new DialogInterface.OnClickListener() {
                         @Override
@@ -258,6 +275,7 @@ public class Krytez_Client extends AppCompatActivity {
                     dialog= new AlertDialog.Builder(Krytez_Client.this);
                     dialog.setTitle("DONE!");
                     dialog.setMessage("Transfer successful!");
+                    dialog.setCancelable(false);
                     dialog.setPositiveButton("Roger that!", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -295,13 +313,13 @@ public class Krytez_Client extends AppCompatActivity {
             Toast.makeText(Krytez_Client.this,"Error!",Toast.LENGTH_LONG).show();
         }
         try {
+            DataOutputStream bo = new DataOutputStream(socket.getOutputStream());
+            PrintWriter pw = new PrintWriter(bo, true);
+            BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            pw.println("Done");
+            pw.flush();
             while(true)
             {
-                DataOutputStream bo = new DataOutputStream(socket.getOutputStream());
-                PrintWriter pw = new PrintWriter(bo, true);
-                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                pw.println("Done");
-                pw.flush();
                 if((fname=br.readLine()).equals("Dirend"))
                 {
                     pw.println("done");
@@ -315,6 +333,10 @@ public class Krytez_Client extends AppCompatActivity {
                     dirTrav(f.getPath(),file);
                     continue;
                 }
+                String filedata[]=fname.split(" ");
+                long transferred=0;
+                long filelen=Long.parseLong(filedata[0]);
+                fname=fname.substring(filedata[0].length()+1);
                 pw.println("Done");
                 File f1= new File(f.getPath(),fname);
                 if (startflag) {
@@ -333,11 +355,19 @@ public class Krytez_Client extends AppCompatActivity {
                 }
                 int len;
                 BufferedInputStream is= new BufferedInputStream(socket.getInputStream());
-                byte[] buff= new byte[1024];
+                byte[] buff= new byte[32768];
                 OutputStream fos= getContentResolver().openOutputStream(Uri.fromFile(f1));
                 pw.println("done");
-                while ((len = is.read(buff,0,1024)) != -1)
+                if(filelen==0)
                 {
+                    fos.flush();
+                    pw.println("received");
+                    continue;
+
+                }
+                while ((len = is.read(buff)) != -1)
+                {
+
                     fos.write(buff, 0, len);
                     fos.flush();
                     transd+=len;
@@ -355,13 +385,14 @@ public class Krytez_Client extends AppCompatActivity {
                     });
                         transd=0;
                     }
+                    transferred+=len;
+                    if(filelen==transferred)
+                        break;
                 }
                 fos.flush();
                 pw.println("received");
-                socket= new Socket(ipadd,port);
 
             }
-            socket= new Socket(ipadd,port);
 
         }catch(Exception e)
         {

@@ -8,6 +8,8 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.provider.OpenableColumns;
 import android.support.v4.provider.DocumentFile;
@@ -26,7 +28,7 @@ import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +41,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Random;
+import java.util.logging.Formatter;
 
 public class Krytez_Server extends AppCompatActivity {
     AlertDialog.Builder dialog,dialog1;
@@ -81,17 +84,164 @@ public class Krytez_Server extends AppCompatActivity {
                 initQR();
                 runOnUiThread(new Runnable() {
                     public void run() {
+                        port.setVisibility(View.VISIBLE);
                         port.setText("Password: "+portno);
                         Toast.makeText(Krytez_Server.this, "Server started!", Toast.LENGTH_LONG).show();
+
                     }
                 });
-                servs = serv.accept();
-                initflag=true;
+                servs=serv.accept();
                 runOnUiThread(new Runnable() {
                     public void run() {
                         Toast.makeText(Krytez_Server.this, "Connection Established!", Toast.LENGTH_LONG).show();
                     }
                 });
+                initflag=true;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                //Send Files
+                File f;
+                String fname;
+                int i=0;
+                trans=0;
+                maintrans=0;
+                datad=data/1000000.0;
+                data/=1000000;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        perc.setVisibility(View.VISIBLE);
+                        pb.setIndeterminate(false);
+                        pb.setMax((int)data);
+                        pb.setProgress(0);
+                    }
+                });
+                try {
+                    BufferedOutputStream bo;
+                    bo = new BufferedOutputStream(servs.getOutputStream());
+                    PrintWriter pw= new PrintWriter(bo,true);
+                    for(Uri path:paths)
+                    {
+                        if(names.get(i).equals("Dir")){
+                            DocumentFile df= DocumentFile.fromTreeUri(Krytez_Server.this,path);
+                            dirTrav(df);
+                            i++;
+                            continue;
+                        }
+                        InputStream is= getContentResolver().openInputStream(path);
+                        fname=names.get(i);
+                        i++;
+                        BufferedReader br= new BufferedReader(new InputStreamReader(servs.getInputStream()));
+                        Cursor cursor= getContentResolver().query(path,null,null,null,null,null);
+                        int sizeind=cursor.getColumnIndex(OpenableColumns.SIZE);
+                        cursor.moveToFirst();
+                        pw.println(cursor.getLong(sizeind)+" "+fname);
+                        br.readLine();
+                        if(startflag)
+                        {
+                            pw.println(datad);
+                            startflag=false;
+                            starttime=System.nanoTime();
+                        }
+                        int len;
+                        byte buff[]= new byte[32768];
+                        //publishProgress(fname);
+                        br.readLine();
+                        while((len=is.read(buff))!=-1)
+                        {
+                            bo.write(buff,0,len);
+                            bo.flush();
+                            trans+=len;
+                            if(trans>=1048576)
+                            {
+                                maintrans+=1;
+                                publishProgress(fname);
+                                trans=0;
+                            }
+                        }
+                        bo.flush();
+                        //servs.shutdownOutput();
+                        br.readLine();
+                        is.close();
+                    }
+                    pw.println("Finished");
+                    bo.flush();
+                    bo.close();
+                    servs.close();
+                    serv.close();
+                    totaltime=System.nanoTime()-starttime;
+                    double time=totaltime/1000000000.0;
+                    time=time*10;
+                    time=Math.floor(time)/10;
+                    rate=(float)(datad/time);
+                    dialog= new AlertDialog.Builder(Krytez_Server.this);
+                    dialog.setTitle("DONE!");
+                    dialog.setPositiveButton("Roger that!", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            reset();
+                            finish();
+                        }
+                    });
+                    dialog.setCancelable(false);
+                    if(time>=1){
+                        dialog.setMessage("Transfer successful!\nAverage transfer speed: "+rate+"MBps");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.show();
+                            }
+                        });}
+                    else{
+                        dialog.setMessage("Transfer successful!");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.show();
+                            }
+                        });
+                    }
+
+
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            reset();
+                            Toast.makeText(Krytez_Server.this,"Error occurred!",Toast.LENGTH_LONG).show();
+                            onBackPressed();
+                        }
+                    });
+                }
             }
             catch (IOException e) {
                 runOnUiThread(new Runnable() {
@@ -113,157 +263,6 @@ public class Krytez_Server extends AppCompatActivity {
                     }
                 });
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //Send Files
-            File f;
-            String fname;
-            int i=0;
-            trans=0;
-            maintrans=0;
-            datad=data/1000000.0;
-            data/=1000000;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    perc.setVisibility(View.VISIBLE);
-                    pb.setIndeterminate(false);
-                    pb.setMax((int)data);
-                    pb.setProgress(0);
-                }
-            });
-            try {
-                BufferedOutputStream bo;
-                for(Uri path:paths)
-                {
-                  if(names.get(i).equals("Dir")){
-                    DocumentFile df= DocumentFile.fromTreeUri(Krytez_Server.this,path);
-                        dirTrav(df);
-                        i++;
-                        servs=serv.accept();
-                        continue;
-                    }
-                    InputStream is= getContentResolver().openInputStream(path);
-                    fname=names.get(i);
-                    i++;
-                    bo = new BufferedOutputStream(servs.getOutputStream());
-                    PrintWriter pw= new PrintWriter(bo,true);
-                    BufferedReader br= new BufferedReader(new InputStreamReader(servs.getInputStream()));
-                    pw.println(fname);
-                    br.readLine();
-                    if(startflag)
-                    {
-                        pw.println(datad);
-                        startflag=false;
-                        starttime=System.nanoTime();
-                    }
-                    int len;
-                    byte buff[]= new byte[1024];
-                    //publishProgress(fname);
-                    br.readLine();
-                    while((len=is.read(buff,0,1024))!=-1)
-                    {
-                        bo.write(buff,0,len);
-                        bo.flush();
-                        trans+=len;
-                        if(trans>=1048576)
-                        {
-                            maintrans+=1;
-                            publishProgress(fname);
-                            trans=0;
-                        }
-                    }
-                    bo.flush();
-                    servs.shutdownOutput();
-                    br.readLine();
-                    bo.close();
-                    is.close();
-                    servs=serv.accept();
-                }
-                bo= new BufferedOutputStream(servs.getOutputStream());
-                PrintWriter pw= new PrintWriter(bo,true);
-                pw.println("Finished");
-                bo.flush();
-                bo.close();
-                servs.close();
-                serv.close();
-                totaltime=System.nanoTime()-starttime;
-                double time=totaltime/1000000000.0;
-                time=time*10;
-                time=Math.floor(time)/10;
-                rate=(float)(datad/time);
-                dialog= new AlertDialog.Builder(Krytez_Server.this);
-                dialog.setTitle("DONE!");
-                dialog.setPositiveButton("Roger that!", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        reset();
-                        finish();
-                    }
-                });
-                dialog.setCancelable(false);
-                if(time>=1){
-                    dialog.setMessage("Transfer successful!\nAverage transfer speed: "+rate+"MBps");
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            dialog.show();
-                        }
-                    });}
-                else{
-                    dialog.setMessage("Transfer successful!");
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            dialog.show();
-                        }
-                    });
-                }
-
-
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        reset();
-                        Toast.makeText(Krytez_Server.this,"Error occurred!",Toast.LENGTH_LONG).show();
-                        onBackPressed();
-                    }
-                });
-            }
-
             return "some";
         }
         public void onProgressUpdate(String... f){
@@ -276,6 +275,7 @@ public class Krytez_Server extends AppCompatActivity {
         }
 
     }
+
     public void showQR(View view) {
         if(qrflag)
         {
@@ -315,7 +315,7 @@ public class Krytez_Server extends AppCompatActivity {
     {
         Uri path;
         try {
-            DataOutputStream bo = new DataOutputStream(servs.getOutputStream());
+            BufferedOutputStream bo = new BufferedOutputStream(servs.getOutputStream());
             PrintWriter pw = new PrintWriter(bo, true);
             BufferedReader br = new BufferedReader(new InputStreamReader(servs.getInputStream()));
             pw.println("Dir");
@@ -333,12 +333,13 @@ public class Krytez_Server extends AppCompatActivity {
                 }
                 else {
 
+
                     InputStream is = getContentResolver().openInputStream(path);
                     fname1 =doc.getName();
-                    bo = new DataOutputStream(servs.getOutputStream());
+                    bo = new BufferedOutputStream(servs.getOutputStream());
                     pw = new PrintWriter(bo, true);
                     br = new BufferedReader(new InputStreamReader(servs.getInputStream()));
-                    pw.println(fname1);
+                    pw.println(doc.length()+" "+fname1);
                     br.readLine();
                     if (startflag) {
                         pw.println(datad);
@@ -346,9 +347,9 @@ public class Krytez_Server extends AppCompatActivity {
                         starttime = System.nanoTime();
                     }
                     int len;
-                    byte buff[] = new byte[1024];
+                    byte buff[] = new byte[32768];
                     br.readLine();
-                    while ((len = is.read(buff,0,1024)) != -1) {
+                    while ((len = is.read(buff)) != -1) {
                         bo.write(buff, 0, len);
                         bo.flush();
                        trans += len;
@@ -365,22 +366,20 @@ public class Krytez_Server extends AppCompatActivity {
                             });
                             trans = 0;
                         }
+
                     }
                     bo.flush();
-                    servs.shutdownOutput();
+                    //servs.shutdownOutput();
                     br.readLine();
                     is.close();
-                    servs = serv.accept();
                 }
             }
-            bo = new DataOutputStream(servs.getOutputStream());
+            bo = new BufferedOutputStream(servs.getOutputStream());
             pw = new PrintWriter(bo, true);
             br = new BufferedReader(new InputStreamReader(servs.getInputStream()));
             pw.println("Dirend");
             br.readLine();
             bo.flush();
-            bo.close();
-            servs=serv.accept();
             return;
 
         }catch(Exception e)
@@ -684,30 +683,31 @@ public class Krytez_Server extends AppCompatActivity {
         });
         dialog1.setCancelable(false);
         btn=findViewById(R.id.button2);
-        int i=0;
 
         try {
-            Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
-            while(en.hasMoreElements()){
-                NetworkInterface nf= en.nextElement();
-                Enumeration<InetAddress> in=nf.getInetAddresses();
-                while(in.hasMoreElements()){
-                    ipa=in.nextElement();
-                    if(ipa.isSiteLocalAddress())
-                    {
-                        i++;
-                        ip.setText("User id:\n"+ipa.toString().substring(1));
-                    }
-                }
-            }
-            if(i==0){
+            final WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
+            final int apState = (Integer) wifiManager.getClass().getMethod("getWifiApState").invoke(wifiManager);
+            if(apState!=13){
                 Toast.makeText(Krytez_Server.this,"Turn on hotspot\n to start sending!",Toast.LENGTH_LONG).show();
                 finish();
-                onBackPressed();
             }
-            else
-            {
-                i=0;
+            else {
+                Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
+                boolean foundAddress = false;
+                while (en.hasMoreElements() && !foundAddress) {
+                    NetworkInterface nf = en.nextElement();
+                    Enumeration<InetAddress> in = nf.getInetAddresses();
+                    while (in.hasMoreElements()) {
+                        ipa = in.nextElement();
+                        if (!ipa.isLoopbackAddress()) {
+                            String sAddr = ipa.getHostAddress();
+                            if (sAddr.indexOf(':') < 0) {
+                                ip.setText("User id:\n" + ipa.toString().substring(1));
+                                foundAddress = true;
+                            }
+                        }
+                    }
+                }
                 server();
             }
         }catch (Exception e)
