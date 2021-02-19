@@ -42,11 +42,7 @@
         android:id="@+id/connectb"
         android:layout_width="121dp"
         android:layout_height="43dp"
-        android:layout_marginStart="125dp"
-        android:layout_marginLeft="125dp"
-        android:layout_marginTop="72dp"
-        android:layout_marginEnd="165dp"
-        android:layout_marginRight="165dp"
+        android:layout_marginTop="24dp"
         android:alpha="0.5"
         android:background="#474545"
         android:onClick="client"
@@ -54,83 +50,70 @@
         android:text="receive"
         android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ipadd" />
+        app:layout_constraintTop_toBottomOf="@+id/port" />
 
-    <EditText
-        android:id="@+id/port"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="99dp"
-        android:layout_marginLeft="99dp"
-        android:layout_marginTop="343dp"
-        android:layout_marginEnd="99dp"
-        android:layout_marginRight="99dp"
-        android:layout_marginBottom="343dp"
-        android:ems="10"
-        android:hint="@string/enter_password"
-        android:inputType="textPersonName"
-        android:textColorHint="#3D7979"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <EditText
+            android:id="@+id/port"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/enter_password"
+            android:inputType="textPersonName"
+            android:textColor="#000000"
+            android:textColorHint="#3D7979"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/ipadd"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="99dp"
-        android:layout_marginLeft="99dp"
-        android:layout_marginEnd="99dp"
-        android:layout_marginRight="99dp"
-        android:layout_marginBottom="16dp"
-        android:ems="10"
-        android:hint="@string/enter_user_id"
-        android:inputType="textPersonName"
-        android:textColorHighlight="#9C27B0"
-        android:textColorHint="#3D7979"
-        app:layout_constraintBottom_toTopOf="@+id/port"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        <EditText
+            android:id="@+id/ipadd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:ems="10"
+            android:hint="@string/enter_user_id"
+            android:inputType="textPersonName"
+            android:textColor="#000000"
+            android:textColorHighlight="#9C27B0"
+            android:textColorHint="#3D7979"
+            app:layout_constraintBottom_toTopOf="@+id/port"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
     <ProgressBar
         android:id="@+id/pb"
         style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="195dp"
-        android:layout_height="5dp"
-        android:layout_marginStart="96dp"
-        android:layout_marginLeft="96dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/perc"
+        android:layout_width="198dp"
+        android:layout_height="3dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/transfer" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/transfer"
         android:layout_width="208dp"
         android:layout_height="95dp"
-        android:layout_marginStart="96dp"
-        android:layout_marginLeft="96dp"
-        android:layout_marginBottom="376dp"
+        android:layout_marginBottom="16dp"
         android:text="TextView"
         android:textColor="#3D7979"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/pb"
+        app:layout_constraintStart_toStartOf="@+id/pb" />
 
     <TextView
         android:id="@+id/perc"
         android:layout_width="207dp"
         android:layout_height="24dp"
-        android:layout_marginStart="96dp"
-        android:layout_marginLeft="96dp"
-        android:layout_marginBottom="316dp"
+        android:layout_marginTop="28dp"
         android:text="TextView"
         android:textColor="#3D7979"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="@+id/pb"
+        app:layout_constraintTop_toBottomOf="@+id/pb" />
 
     <Button
         android:id="@+id/but"

@@ -26,8 +26,6 @@
         android:id="@+id/receiveb"
         android:layout_width="124dp"
         android:layout_height="64dp"
-        android:layout_marginStart="140dp"
-        android:layout_marginLeft="140dp"
         android:layout_marginBottom="132dp"
         android:alpha="0.5"
         android:background="#474545"
@@ -35,6 +33,6 @@
         android:text="Receive"
         android:textColor="#ffffff"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="@+id/senb" />
 
 </android.support.constraint.ConstraintLayout>
