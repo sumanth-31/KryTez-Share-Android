@@ -6,8 +6,12 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.Actionbar</item>
     </style>
     <style name="AppTheme.BlueAccent">
         <item name="colorAccent">@color/colorPrimary</item>
+    </style>
+    <style name="ThemeOverlay.Actionbar" parent="ThemeOverlay.MaterialComponents.ActionBar.Surface">
+        <item name="android:textColorPrimary">#ffffff</item>
     </style>
 </resources>
