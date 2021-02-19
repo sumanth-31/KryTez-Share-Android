@@ -9,8 +9,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,15 +20,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.textfield.TextInputEditText;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -42,10 +47,12 @@ public class Krytez_Client extends AppCompatActivity {
     ProgressBar pb;
     TextView trans,perc;
     AlertDialog.Builder dialog;
-    EditText ip,portt;
+    TextInputEditText ip,portt;
     Button conn,scbtn;
     String file,datas;
     long starttime,endtime,totaltime,transd,maintrans;
+    ConstraintLayout loginLayout;
+    LinearLayout transferLayout;
     Intent intent;
     double datad;
     Socket socket;
@@ -65,13 +72,8 @@ public class Krytez_Client extends AppCompatActivity {
         protected void onPreExecute()
         {
 
-            pb.setVisibility(View.VISIBLE);
-            trans.setVisibility(View.VISIBLE);
-            ip.setVisibility(View.INVISIBLE);
-            scbtn.setVisibility(View.INVISIBLE);
-            portt.setVisibility(View.INVISIBLE);
-            conn.setVisibility(View.INVISIBLE);
-            perc.setVisibility(View.VISIBLE);
+            transferLayout.setVisibility(View.VISIBLE);
+            loginLayout.setVisibility(View.GONE);
             path=dir.getString("directory",null);
             File fl=new File(path);
             if(path==null)
@@ -452,7 +454,7 @@ public class Krytez_Client extends AppCompatActivity {
     }
     public void rgVis(View view)
     {
-        rg.setVisibility(View.INVISIBLE);
+        rg.setVisibility(View.GONE);
     }
     public void scan(View view)
     {
@@ -503,12 +505,11 @@ public class Krytez_Client extends AppCompatActivity {
                 Toast.makeText(Krytez_Client.this,"Failed!\nCheck if sd card is inserted",Toast.LENGTH_LONG).show();
             }
         }
-        rg.setVisibility(View.INVISIBLE);
+        rg.setVisibility(View.GONE);
         direditor.commit();
     }
     public void reset(){
         start();
-        perc.setVisibility(View.INVISIBLE);
         perc.setText("0%");
         startflag=true;
         perflag=false;
@@ -554,13 +555,9 @@ public class Krytez_Client extends AppCompatActivity {
     }
     public void start()
     {
-        pb.setVisibility(View.INVISIBLE);
-        trans.setVisibility(View.INVISIBLE);
-        ip.setVisibility(View.VISIBLE);
-        portt.setVisibility(View.VISIBLE);
-        conn.setVisibility(View.VISIBLE);
+        transferLayout.setVisibility(View.GONE);
+        loginLayout.setVisibility(View.VISIBLE);
         trans.setText("Waiting for files");
-        scbtn.setVisibility(View.VISIBLE);
     }
 
 
@@ -586,25 +583,20 @@ public class Krytez_Client extends AppCompatActivity {
         setContentView(R.layout.activity_krytez__client);
         scbtn= findViewById(R.id.but);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        ip= (EditText) findViewById(R.id.ipadd);
-        portt=(EditText) findViewById(R.id.port);
+        ip= (TextInputEditText) findViewById(R.id.ipadd);
+        portt=(TextInputEditText) findViewById(R.id.port);
         conn= (Button) findViewById(R.id.connectb);
         pb= (ProgressBar) findViewById(R.id.pb);
+        loginLayout=(ConstraintLayout)findViewById(R.id.loginLayout);
+        transferLayout=(LinearLayout)findViewById(R.id.transferLayout);
         pb.setIndeterminate(true);
         trans=(TextView) findViewById(R.id.transfer);
         perc=(TextView) findViewById(R.id.perc);
-        pb.setVisibility(View.INVISIBLE);
-        trans.setVisibility(View.INVISIBLE);
-        ip.setVisibility(View.VISIBLE);
-        portt.setVisibility(View.VISIBLE);
-        conn.setVisibility(View.VISIBLE);
         trans.setText("Waiting for files");
-        perc.setVisibility(View.INVISIBLE);
         perc.setText(0+"%");
         rg=findViewById(R.id.rgroup);
         intr= findViewById(R.id.intr);
         extr=findViewById(R.id.extr);
-        rg.setVisibility(View.INVISIBLE);
         int i=0;
         try {
             Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
