@@ -511,6 +511,7 @@ public class Krytez_Client extends AppCompatActivity {
     public void reset(){
         start();
         perc.setText("0%");
+        perc.setVisibility(View.GONE);
         startflag=true;
         perflag=false;
         finflag=false;

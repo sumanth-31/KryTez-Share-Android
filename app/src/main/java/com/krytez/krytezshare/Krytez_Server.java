@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +60,7 @@ public class Krytez_Server extends AppCompatActivity {
     double datad;
     long trans=0,data=0,starttime,totaltime,maintrans=0;
     String fname1;
+    LinearLayout infoLayout,transferLayout;
     public class FtpR extends AsyncTask<String, String, String> {
         public void onPreExecute()
         {
@@ -281,6 +283,8 @@ public class Krytez_Server extends AppCompatActivity {
                 @Override
                 public void run() {
                     img.setVisibility(View.VISIBLE);
+                    transferLayout.setVisibility(View.GONE);
+                    infoLayout.setVisibility(View.GONE);
                 }
             });
             qrflag=false;
@@ -291,7 +295,9 @@ public class Krytez_Server extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    img.setVisibility(View.INVISIBLE);
+                    img.setVisibility(View.GONE);
+                    transferLayout.setVisibility(View.VISIBLE);
+                    infoLayout.setVisibility(View.VISIBLE);
                 }
             });
             qrflag=true;
@@ -427,8 +433,6 @@ public class Krytez_Server extends AppCompatActivity {
         setBack();
         ind=0;
         data=0;
-        pbtext.setText("Waiting for receiver...");
-        perc.setVisibility(View.INVISIBLE);
         paths.clear();
         names.clear();
         startflag=true;
@@ -595,11 +599,9 @@ public class Krytez_Server extends AppCompatActivity {
     }
 
     public void setBack(){
-
-        pb.setVisibility(View.INVISIBLE);
-        pbtext.setVisibility(View.INVISIBLE);
-        ip.setVisibility(View.VISIBLE);
-        port.setVisibility(View.VISIBLE);
+        perc.setText("0%");
+        pbtext.setText("Waiting for receiver....");
+        perc.setVisibility(View.GONE);
     }
     public void selectF()
     {
@@ -622,11 +624,12 @@ public class Krytez_Server extends AppCompatActivity {
         setContentView(R.layout.activity_krytez__server);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         img= findViewById(R.id.image);
-        img.setVisibility(View.INVISIBLE);
         filechooser = new Intent(Intent.ACTION_GET_CONTENT);
         ip = (TextView) findViewById(R.id.ip);
         port = (TextView) findViewById(R.id.port);
         perc=(TextView) findViewById(R.id.perc);
+        infoLayout=(LinearLayout)findViewById(R.id.infoLayout);
+        transferLayout=(LinearLayout) findViewById(R.id.transferLayout);
         paths=new ArrayList<>();
         names= new ArrayList<>();
         filechooser= new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -634,7 +637,7 @@ public class Krytez_Server extends AppCompatActivity {
         pb= (ProgressBar) findViewById(R.id.pb);
         pbtext=(TextView) findViewById(R.id.pbtext);
         pb.setIndeterminate(true);
-        perc.setVisibility(View.INVISIBLE);
+        perc.setVisibility(View.GONE);
         perc.setText("0%");
         pbtext.setText("Waiting for receiver....");
         dialog=new AlertDialog.Builder(Krytez_Server.this);
