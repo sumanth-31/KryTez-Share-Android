@@ -48,6 +48,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <TextView
+            android:id="@+id/transfer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textColor="#3D7979"
+            android:layout_marginBottom="5dp" />
+
         <ProgressBar
             android:id="@+id/pb"
             style="?android:attr/progressBarStyleHorizontal"
@@ -57,14 +65,6 @@
 
         <TextView
             android:id="@+id/perc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:text="TextView"
-            android:textColor="#3D7979" />
-
-        <TextView
-            android:id="@+id/transfer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="TextView"
