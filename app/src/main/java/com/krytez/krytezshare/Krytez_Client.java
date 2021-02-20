@@ -78,8 +78,7 @@ public class Krytez_Client extends AppCompatActivity {
             File fl=new File(path);
             if(path==null)
             {
-                Toast.makeText(Krytez_Client.this,"Error with storage directory!",Toast.LENGTH_LONG).show();
-                finish();
+                quitWithError("Error with storage directory!");
             }
             else
             {
@@ -192,54 +191,31 @@ public class Krytez_Client extends AppCompatActivity {
                 }
             }catch(NumberFormatException nfe)
             {
-
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(Krytez_Client.this,"Enter a proper User id and Password!",Toast.LENGTH_LONG).show();
-
-                    }
-                });
-                nfe.printStackTrace();
+                quitWithError("Enter a proper User id and Password!");
+                //nfe.printStackTrace();
 
             }
             catch(java.net.UnknownHostException un)
             {
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(Krytez_Client.this,"Enter a proper User Id and Password!",Toast.LENGTH_LONG).show();
-
-                    }
-                });
-                //Toast.makeText(MainActivity.this,"Enter a proper IP and port!",Toast.LENGTH_LONG).show();
-                un.printStackTrace();
+                quitWithError("Enter a proper User Id and Password!");
+                //un.printStackTrace();
             }
             catch(java.net.NoRouteToHostException no)
             {
-
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(Krytez_Client.this,"There is no active server at the specified User Id!",Toast.LENGTH_LONG).show();
-
-                    }
-                });
-                no.printStackTrace();
+                quitWithError("There is no active server at the specified User Id!");
+                //no.printStackTrace();
             }
             catch(Exception e)
             {
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        Toast.makeText(Krytez_Client.this, "Error occurred!\nTry checking storage permissions or connection\nor available storage.", Toast.LENGTH_LONG).show();
-
-                    }
-                });
-                e.printStackTrace();
+                quitWithError("Error occurred!\nTry checking storage permissions or connection\nor available storage.");
+                //e.printStackTrace();
             }
             endtime=System.nanoTime();
             return "Not Yet";
         }
         protected void onProgressUpdate(String... para)
         {
-            trans.setText("Transfering file: "+para[0]);
+            trans.setText("Transferring file: "+para[0]);
             perc.setText(maintrans+"MB/"+data+"MB");
             pb.setProgress((int)maintrans,true);
 
@@ -398,15 +374,29 @@ public class Krytez_Client extends AppCompatActivity {
 
         }catch(Exception e)
         {
-            e.printStackTrace();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(Krytez_Client.this,"Error Occured!",Toast.LENGTH_LONG).show();
-                }
-            });
+            //e.printStackTrace();
+            quitWithError("Error Occured!");
         }
 
+    }
+    public void quitWithError(String message){
+        dialog=new AlertDialog.Builder(Krytez_Client.this);
+        dialog.setTitle("Error!");
+        dialog.setMessage(message);
+        dialog.setCancelable(false);
+        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                reset();
+                finish();
+            }
+        });
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        });
     }
     public void onBackPressed(){
 

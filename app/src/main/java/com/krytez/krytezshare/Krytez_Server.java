@@ -61,6 +61,7 @@ public class Krytez_Server extends AppCompatActivity {
     long trans=0,data=0,starttime,totaltime,maintrans=0;
     String fname1;
     LinearLayout infoLayout,transferLayout;
+    FtpR asyncTask;
     public class FtpR extends AsyncTask<String, String, String> {
         public void onPreExecute()
         {
@@ -170,7 +171,7 @@ public class Krytez_Server extends AppCompatActivity {
                         byte buff[]= new byte[32768];
                         //publishProgress(fname);
                         br.readLine();
-                        while((len=is.read(buff))!=-1)
+                        while(((len=is.read(buff))!=-1)&&(!this.isCancelled()))
                         {
                             bo.write(buff,0,len);
                             bo.flush();
@@ -203,7 +204,7 @@ public class Krytez_Server extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
-                            reset();
+//                            reset();
                             finish();
                         }
                     });
@@ -230,37 +231,16 @@ public class Krytez_Server extends AppCompatActivity {
                 }
                 catch(Exception e)
                 {
-                    e.printStackTrace();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            reset();
-                            Toast.makeText(Krytez_Server.this,"Error occurred!",Toast.LENGTH_LONG).show();
-                            onBackPressed();
-                        }
-                    });
+                    //e.printStackTrace();
+                    quitWithError("Error occurred!");
                 }
             }
             catch (IOException e) {
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        setBack();
-                        Toast.makeText(Krytez_Server.this, "Error while connecting!", Toast.LENGTH_LONG).show();
-                        onBackPressed();
-                    }
-                });
-
+                quitWithError("Error while connecting!");
             }
             catch (Exception e){
-                e.printStackTrace();
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        setBack();
-                        Toast.makeText(Krytez_Server.this, "Error occurred!\nTry restarting the service", Toast.LENGTH_LONG).show();
-                        onBackPressed();
-                    }
-                });
+                //e.printStackTrace();
+                quitWithError("Error occurred!\nTry restarting the service");
             }
             return "some";
         }
@@ -272,9 +252,28 @@ public class Krytez_Server extends AppCompatActivity {
         }
         public void onPostExecute(String f) {
         }
-
     }
 
+    public void quitWithError(String message){
+        dialog=new AlertDialog.Builder(Krytez_Server.this);
+        dialog.setTitle("Error!");
+        dialog.setMessage(message);
+        dialog.setCancelable(false);
+        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+//                setBack();
+//                reset();
+                finish();
+            }
+        });
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        });
+    }
     public void showQR(View view) {
         if(qrflag)
         {
@@ -352,7 +351,7 @@ public class Krytez_Server extends AppCompatActivity {
                     int len;
                     byte buff[] = new byte[32768];
                     br.readLine();
-                    while ((len = is.read(buff)) != -1) {
+                    while (((len = is.read(buff)) != -1)&&(!asyncTask.isCancelled())) {
                         bo.write(buff, 0, len);
                         bo.flush();
                        trans += len;
@@ -387,13 +386,8 @@ public class Krytez_Server extends AppCompatActivity {
 
         }catch(Exception e)
         {
-            e.printStackTrace();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(Krytez_Server.this,"Error Occured!",Toast.LENGTH_LONG).show();
-                }
-            });
+            //e.printStackTrace();
+            quitWithError("Error Occurred!");
         }
 
     }
@@ -404,7 +398,13 @@ public class Krytez_Server extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        reset();
+//                        reset();
+                        try {
+                            serv.close();
+                        } catch (IOException e) {
+                            quitWithError("Couldn't stop server!\nKindly restart app if you need to send again");
+                        }
+                        asyncTask.cancel(true);
                         finish();
                     }
                 }
@@ -428,27 +428,27 @@ public class Krytez_Server extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
 
     }
-    public void reset(){
-
-        setBack();
-        ind=0;
-        data=0;
-        paths.clear();
-        names.clear();
-        startflag=true;
-        try {
-            if(initflag)
-                servs.close();
-            if(initflag1)
-                serv.close();
-        }catch(Exception e){
-            e.printStackTrace();
-            Toast.makeText(Krytez_Server.this,"Error occured while closing server!",Toast.LENGTH_LONG).show();
-        }
-
-        initflag=false;
-        initflag1=false;
-    }
+//    public void reset(){
+//
+//        setBack();
+//        ind=0;
+//        data=0;
+//        paths.clear();
+//        names.clear();
+//        startflag=true;
+//        try {
+//            if(initflag)
+//                servs.close();
+//            if(initflag1)
+//                serv.close();
+//        }catch(Exception e){
+//            e.printStackTrace();
+//            Toast.makeText(Krytez_Server.this,"Error occurred while closing server!",Toast.LENGTH_LONG).show();
+//        }
+//
+//        initflag=false;
+//        initflag1=false;
+//    }
     public void select() {
 
         filechooser= new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -481,96 +481,75 @@ public class Krytez_Server extends AppCompatActivity {
         intent.putExtra(Intent.EXTRA_EMAIL,mail);
         startActivity(Intent.createChooser(intent,"Send feedback mail"));
     }
-    protected void onActivityResult(int requestcode ,int resultcode,Intent data)
-    {
-        int j=ind;
-        if (requestcode == 10)
-        {
+    protected void onActivityResult(int requestcode ,int resultcode,Intent data) {
+        super.onActivityResult(requestcode, resultcode, data);
+        int j = ind;
+        if (requestcode == 10) {
 
-            if (resultcode == RESULT_OK)
-            {
-                if(data.getData()!=null)
-                {
+            if (resultcode == RESULT_OK) {
+                if (data.getData() != null) {
                     paths.add(data.getData());
 
                     ind++;
-                }else if(data.getClipData()!=null)
-                {
+                } else if (data.getClipData() != null) {
 
-                    for(int i=0;i<data.getClipData().getItemCount();i++,ind++)
-                    {
+                    for (int i = 0; i < data.getClipData().getItemCount(); i++, ind++) {
                         paths.add(data.getClipData().getItemAt(i).getUri());
                     }
                 }
-                for(;j<ind;j++)
-                {
-                    Uri file= paths.get(j);
-                    Cursor cursor = getContentResolver().query(file,null,null,null,null);
-                    int sizeind=cursor.getColumnIndex(OpenableColumns.SIZE);
-                    int nameind=cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                for (; j < ind; j++) {
+                    Uri file = paths.get(j);
+                    Cursor cursor = getContentResolver().query(file, null, null, null, null);
+                    int sizeind = cursor.getColumnIndex(OpenableColumns.SIZE);
+                    int nameind = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                     cursor.moveToFirst();
-                    this.data+=cursor.getLong(sizeind);
+                    this.data += cursor.getLong(sizeind);
                     names.add(cursor.getString(nameind));
                 }
                 server2();
-            }
-            else
-            {Toast.makeText(Krytez_Server.this,"Choose at least one file to send!",Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(Krytez_Server.this, "Choose at least one file to send!", Toast.LENGTH_LONG).show();
                 onBackPressed();
             }
-        }
-        else if(requestcode==25)
-        {
-            if(resultcode==RESULT_OK)
-            {
-                byte[] bytearr=data.getByteArrayExtra("image");
+        } else if (requestcode == 25) {
+            if (resultcode == RESULT_OK) {
+                byte[] bytearr = data.getByteArrayExtra("image");
 
-                img.setImageBitmap(BitmapFactory.decodeByteArray(bytearr,0,bytearr.length));
+                img.setImageBitmap(BitmapFactory.decodeByteArray(bytearr, 0, bytearr.length));
+            } else {
+
+                Toast.makeText(Krytez_Server.this, "Error with QR generation", Toast.LENGTH_LONG).show();
             }
-            else
-            {
+        } else if (requestcode == 13) {
 
-                Toast.makeText(Krytez_Server.this,"Error with QR generation",Toast.LENGTH_LONG).show();
-            }
-        }
-        else if(requestcode==13)
-        {
-
-            if (resultcode == RESULT_OK)
-            {
-                if(data.getData()!=null)
-                {
+            if (resultcode == RESULT_OK) {
+                if (data.getData() != null) {
                     paths.add(data.getData());
                     ind++;
-                }else if(data.getClipData()!=null)
-                {
-                    for(int i=0;i<data.getClipData().getItemCount();i++,ind++)
-                    {
+                } else if (data.getClipData() != null) {
+                    for (int i = 0; i < data.getClipData().getItemCount(); i++, ind++) {
                         paths.add(data.getClipData().getItemAt(i).getUri());
                     }
                 }
-                for(;j<ind;j++)
-                {
+                for (; j < ind; j++) {
                     try {
                         Uri file = paths.get(j);
-                        DocumentFile df= DocumentFile.fromTreeUri(Krytez_Server.this,file);
+                        DocumentFile df = DocumentFile.fromTreeUri(Krytez_Server.this, file);
                         calc(df);
                         names.add("Dir");
-                    }catch(Exception e)
-                    {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(Krytez_Server.this,"Error Occured!",Toast.LENGTH_LONG).show();
+                                Toast.makeText(Krytez_Server.this, "Error Occured!", Toast.LENGTH_LONG).show();
                             }
                         });
                     }
                 }
                 server2();
-            }
-            else
-            {Toast.makeText(Krytez_Server.this,"Choose at least one folder to send!",Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(Krytez_Server.this, "Choose at least one folder to send!", Toast.LENGTH_LONG).show();
                 onBackPressed();
             }
         }
@@ -594,7 +573,8 @@ public class Krytez_Server extends AppCompatActivity {
         startActivity(Intent.createChooser(intent,"Download KryTez for PC"));
     }
     public void send(){
-        new FtpR().execute("hi");
+        asyncTask=new FtpR();
+        asyncTask.execute("hi");
 
     }
 
