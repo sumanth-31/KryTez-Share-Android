@@ -228,14 +228,17 @@ public class Krytez_Server extends BaseActivity {
                 catch(Exception e)
                 {
                     //e.printStackTrace();
+                    if(!this.isCancelled())
                     quitWithError("Error occurred!");
                 }
             }
             catch (IOException e) {
+                if(!this.isCancelled())
                 quitWithError("Error while connecting!");
             }
             catch (Exception e){
                 //e.printStackTrace();
+                if(!this.isCancelled())
                 quitWithError("Error occurred!\nTry restarting the service");
             }
             return "some";
@@ -380,6 +383,7 @@ public class Krytez_Server extends BaseActivity {
         }catch(Exception e)
         {
             //e.printStackTrace();
+            if(!asyncTask.isCancelled())
             quitWithError("Error Occurred!");
         }
 
@@ -392,8 +396,10 @@ public class Krytez_Server extends BaseActivity {
         dialog.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         try {
-                            serv.close();
+                            if(servs!=null)
                             servs.close();
+                            if(serv!=null)
+                            serv.close();
                         } catch (IOException e) {
                             quitWithError("Couldn't stop server!\nKindly restart app if you need to send again");
                         }

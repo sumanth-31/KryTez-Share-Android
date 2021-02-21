@@ -188,23 +188,24 @@ public class Krytez_Client extends BaseActivity {
                 }
             }catch(NumberFormatException nfe)
             {
-                nfe.printStackTrace();
+//                nfe.printStackTrace();
                 quitWithError("Enter a proper User id and Password!");
 
             }
             catch(java.net.UnknownHostException un)
             {
-                un.printStackTrace();
+//                un.printStackTrace();
                 quitWithError("Enter a proper User Id and Password!");
             }
             catch(java.net.NoRouteToHostException no)
             {
-                no.printStackTrace();
+//                no.printStackTrace();
                 quitWithError("There is no active server at the specified User Id!");
             }
             catch(Exception e)
             {
-                e.printStackTrace();
+//                e.printStackTrace();
+                if(!ftp.isCancelled())
                 quitWithError("Error occurred!\nTry checking storage permissions or connection\nor available storage.");
             }
             endtime=System.nanoTime();
@@ -361,7 +362,8 @@ public class Krytez_Client extends BaseActivity {
 
         }catch(Exception e)
         {
-            e.printStackTrace();
+//            e.printStackTrace();
+            if(!ftp.isCancelled())
             quitWithError("Error Occured!");
         }
 
