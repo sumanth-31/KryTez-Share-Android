@@ -4,39 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:onClick="rgVis"
     tools:context=".Krytez_Client">
-
-    <RadioGroup
-        android:id="@+id/rgroup"
-        android:layout_width="169dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="241dp"
-        android:layout_marginLeft="241dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginRight="1dp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="2dp">
-
-        <RadioButton
-            android:id="@+id/intr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="storageSet"
-            android:text="Internal Storage" />
-
-        <RadioButton
-            android:id="@+id/extr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="storageSet"
-            android:text="ExternalStorage" />
-
-    </RadioGroup>
 
 
     <LinearLayout
@@ -52,16 +20,17 @@
             android:id="@+id/transfer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
             android:text="TextView"
-            android:textColor="#3D7979"
-            android:layout_marginBottom="5dp" />
+            android:textColor="#3D7979" />
 
         <ProgressBar
             android:id="@+id/pb"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="10dp"
-            android:layout_marginBottom="5dp" />
+            android:layout_marginBottom="5dp"
+            android:theme="@style/AppTheme.BlueAccent" />
 
         <TextView
             android:id="@+id/perc"

@@ -11,7 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-public class ParentActivity extends AppCompatActivity {
+public class ParentActivity extends BaseActivity {
     Button sendb, recb;
 
     public void send(View view) {
@@ -27,32 +27,6 @@ public class ParentActivity extends AppCompatActivity {
 
     public void onBackPressed() {
         finishAffinity();
-    }
-
-    public boolean onCreateOptionsMenu(Menu menu)
-
-    {
-        MenuInflater min= getMenuInflater();
-        min.inflate(R.menu.activity_basic_menu,menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-    public void gotoKrytez(MenuItem item)
-    {
-        Intent intent= new Intent(Intent.ACTION_SEND);
-        intent.setData(Uri.parse("mailto:"));
-        intent.setType("text/plain");
-        String[] mail={"krytez.tech@gmail.com"};
-        intent.putExtra(Intent.EXTRA_SUBJECT,"Feedback for KryTez Share");
-        intent.putExtra(Intent.EXTRA_TEXT,"");
-        intent.putExtra(Intent.EXTRA_EMAIL,mail);
-        startActivity(Intent.createChooser(intent,"Send feedback mail"));
-
-    }
-    public void pc(MenuItem item)
-    {
-        Intent intent= new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse("https://drive.google.com/open?id=1ZKN9MOSQrYP8-g4EYbQiv90Fux8H4a8u"));
-        startActivity(Intent.createChooser(intent,"Download KryTez for PC"));
     }
 
 

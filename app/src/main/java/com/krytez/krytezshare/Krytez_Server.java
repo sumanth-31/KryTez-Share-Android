@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Random;
 
-public class Krytez_Server extends AppCompatActivity {
+public class Krytez_Server extends BaseActivity {
     AlertDialog.Builder dialog,dialog1;
     TextView ip,port;
     Intent filechooser;
@@ -169,7 +169,6 @@ public class Krytez_Server extends AppCompatActivity {
                         }
                         int len;
                         byte buff[]= new byte[32768];
-                        //publishProgress(fname);
                         br.readLine();
                         while(((len=is.read(buff))!=-1)&&(!this.isCancelled()))
                         {
@@ -184,7 +183,6 @@ public class Krytez_Server extends AppCompatActivity {
                             }
                         }
                         bo.flush();
-                        //servs.shutdownOutput();
                         br.readLine();
                         is.close();
                     }
@@ -203,8 +201,6 @@ public class Krytez_Server extends AppCompatActivity {
                     dialog.setPositiveButton("Roger that!", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
-//                            reset();
                             finish();
                         }
                     });
@@ -262,8 +258,6 @@ public class Krytez_Server extends AppCompatActivity {
         dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-//                setBack();
-//                reset();
                 finish();
             }
         });
@@ -371,7 +365,6 @@ public class Krytez_Server extends AppCompatActivity {
 
                     }
                     bo.flush();
-                    //servs.shutdownOutput();
                     br.readLine();
                     is.close();
                 }
@@ -398,7 +391,6 @@ public class Krytez_Server extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-//                        reset();
                         try {
                             serv.close();
                         } catch (IOException e) {
@@ -417,38 +409,6 @@ public class Krytez_Server extends AppCompatActivity {
         dialog.show();
 
     }
-    public boolean onOptionsItemSelected(MenuItem item){
-        switch (item.getItemId())
-        {
-            case android.R.id.home:
-                onBackPressed();
-                //finish();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-
-    }
-//    public void reset(){
-//
-//        setBack();
-//        ind=0;
-//        data=0;
-//        paths.clear();
-//        names.clear();
-//        startflag=true;
-//        try {
-//            if(initflag)
-//                servs.close();
-//            if(initflag1)
-//                serv.close();
-//        }catch(Exception e){
-//            e.printStackTrace();
-//            Toast.makeText(Krytez_Server.this,"Error occurred while closing server!",Toast.LENGTH_LONG).show();
-//        }
-//
-//        initflag=false;
-//        initflag1=false;
-//    }
     public void select() {
 
         filechooser= new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -461,25 +421,6 @@ public class Krytez_Server extends AppCompatActivity {
             Toast.makeText(Krytez_Server.this,"Error occured!\nContact KryTez team for support",Toast.LENGTH_LONG).show();
             onBackPressed();
         }
-    }
-    public boolean onCreateOptionsMenu(Menu menu)
-
-    {
-        MenuInflater min= getMenuInflater();
-        min.inflate(R.menu.activity_basic_menu,menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-    public void gotoKrytez(MenuItem menu)
-    {
-
-        Intent intent= new Intent(Intent.ACTION_SEND);
-        intent.setData(Uri.parse("mailto:"));
-        intent.setType("text/plain");
-        String[] mail={"krytez.tech@gmail.com"};
-        intent.putExtra(Intent.EXTRA_SUBJECT,"Feedback for KryTez Share");
-        intent.putExtra(Intent.EXTRA_TEXT,"");
-        intent.putExtra(Intent.EXTRA_EMAIL,mail);
-        startActivity(Intent.createChooser(intent,"Send feedback mail"));
     }
     protected void onActivityResult(int requestcode ,int resultcode,Intent data) {
         super.onActivityResult(requestcode, resultcode, data);
@@ -565,12 +506,6 @@ public class Krytez_Server extends AppCompatActivity {
             else
             this.data +=dfa.length();
         }
-    }
-    public void pc(MenuItem item)
-    {
-        Intent intent= new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse("https://drive.google.com/open?id=1ZKN9MOSQrYP8-g4EYbQiv90Fux8H4a8u"));
-        startActivity(Intent.createChooser(intent,"Download KryTez for PC"));
     }
     public void send(){
         asyncTask=new FtpR();

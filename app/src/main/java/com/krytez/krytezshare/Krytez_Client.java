@@ -19,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -43,7 +42,7 @@ import java.net.NetworkInterface;
 import java.net.Socket;
 import java.util.Enumeration;
 
-public class Krytez_Client extends AppCompatActivity {
+public class Krytez_Client extends BaseActivity {
     ProgressBar pb;
     TextView trans,perc;
     AlertDialog.Builder dialog;
@@ -61,11 +60,9 @@ public class Krytez_Client extends AppCompatActivity {
     int data;
     SharedPreferences dir;
     SharedPreferences.Editor direditor;
-    RadioGroup rg;
-    RadioButton intr,extr;
     int port;
     String ipadd,fname;
-
+    Ftp ftp;
     public class Ftp extends AsyncTask<String ,String,String>
     {
         String path;
@@ -109,7 +106,7 @@ public class Krytez_Client extends AppCompatActivity {
                 br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 BufferedOutputStream bo = new BufferedOutputStream(socket.getOutputStream());
                 PrintWriter pw = new PrintWriter(bo, true);
-                while(true) {
+                while(!this.isCancelled()) {
                     initflag=true;
                     file = br.readLine();
 
@@ -170,7 +167,7 @@ public class Krytez_Client extends AppCompatActivity {
                         publishProgress(file);
                         continue;
                     }
-                    while (((len = is.read(buff)) != -1)) {
+                    while (((len = is.read(buff)) != -1) &&(!this.isCancelled())) {
                        fos.write(buff, 0, len);
                        fos.flush();
                         transd+=len;
@@ -239,7 +236,6 @@ public class Krytez_Client extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             finflag=false;
-                            reset();
                         }
                     });
                     runOnUiThread(new Runnable() {
@@ -259,20 +255,17 @@ public class Krytez_Client extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
 
                             finflag=false;
-                            reset();
                         }
                     });
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            // Toast.makeText(Krytez_Server.this,"Transfer successful!\nAverage transfer speed: "+rate+"MBps",Toast.LENGTH_LONG).show();
                             dialog.show();
                         }
                     });
                 }
                 finflag=false;
             }
-            reset();
         }
 
 
@@ -296,7 +289,7 @@ public class Krytez_Client extends AppCompatActivity {
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             pw.println("Done");
             pw.flush();
-            while(true)
+            while(!ftp.isCancelled())
             {
                 if((fname=br.readLine()).equals("Dirend"))
                 {
@@ -343,7 +336,7 @@ public class Krytez_Client extends AppCompatActivity {
                     continue;
 
                 }
-                while ((len = is.read(buff)) != -1)
+                while (((len = is.read(buff)) != -1)&&(!ftp.isCancelled()))
                 {
 
                     fos.write(buff, 0, len);
@@ -387,7 +380,7 @@ public class Krytez_Client extends AppCompatActivity {
         dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                reset();
+                ftp.cancel(true);
                 finish();
             }
         });
@@ -399,14 +392,18 @@ public class Krytez_Client extends AppCompatActivity {
         });
     }
     public void onBackPressed(){
-
+        if(ftp==null || ftp.isCancelled())
+        {
+            finish();
+            return;
+        }
         dialog= new AlertDialog.Builder(Krytez_Client.this);
         dialog.setMessage("Are you sure you want to stop receiving?\n");
         dialog.setTitle("Confirmation");
         dialog.setCancelable(false);
         dialog.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        reset();
+                        ftp.cancel(true);
                         finish();
                     }
                 }
@@ -417,35 +414,9 @@ public class Krytez_Client extends AppCompatActivity {
             }
         });
         dialog.show();
-
-
     }
 
-    public boolean onOptionsItemSelected(MenuItem item){
-        switch (item.getItemId())
-        {
-            case android.R.id.home: {
-                onBackPressed();
-                return true;
-            }
-            case R.id.dir:
-            {
-                rg.setVisibility(View.VISIBLE);
-                break;
-            }
-            case R.id.path:
-            {
-                Toast.makeText(Krytez_Client.this,"Files are stored at: "+dir.getString("directory","error"),Toast.LENGTH_LONG).show();
-                break;
-            }
-        }
-        return super.onOptionsItemSelected(item);
 
-    }
-    public void rgVis(View view)
-    {
-        rg.setVisibility(View.GONE);
-    }
     public void scan(View view)
     {
     Intent in= new Intent(this,QRScan.class);
@@ -468,53 +439,6 @@ public class Krytez_Client extends AppCompatActivity {
                 });
             }
         }
-
-    public void storageSet(View view){
-        String path;
-        if(view.getId()==intr.getId())
-        {
-            direditor.putBoolean("intr",true);
-            direditor.putBoolean("extr",false);
-            path=Environment.getExternalStorageDirectory().toString()+"/KryTez Share";
-            direditor.putString("directory", path);
-            Toast.makeText(Krytez_Client.this,"Files will be stored in: "+path,Toast.LENGTH_LONG).show();
-        }
-        else
-        {
-            File[] f=getExternalFilesDirs(null);
-            if(f.length>1)
-            {
-                path=f[1].toString();
-                direditor.putString("directory",path);
-                direditor.putBoolean("intr",false);
-                direditor.putBoolean("extr",true);
-                Toast.makeText(Krytez_Client.this,"Files will be stored in: "+path,Toast.LENGTH_LONG).show();
-            }
-            else
-            {
-                Toast.makeText(Krytez_Client.this,"Failed!\nCheck if sd card is inserted",Toast.LENGTH_LONG).show();
-            }
-        }
-        rg.setVisibility(View.GONE);
-        direditor.commit();
-    }
-    public void reset(){
-        start();
-        perc.setText("0%");
-        perc.setVisibility(View.GONE);
-        startflag=true;
-        perflag=false;
-        finflag=false;
-        try{
-            if(initflag)
-            socket.close();
-        }catch(Exception e)
-        {
-            Toast.makeText(Krytez_Client.this,"Error closing connection!",Toast.LENGTH_LONG).show();
-        }
-
-        initflag=false;
-    }
     public void client2()
     {
 
@@ -524,7 +448,8 @@ public class Krytez_Client extends AppCompatActivity {
         else
             perflag=false;
 
-        new Ftp().execute("hi");
+        ftp=new Ftp();
+        ftp.execute("hi");
     }
     public void client(View view)
     {
@@ -538,12 +463,6 @@ public class Krytez_Client extends AppCompatActivity {
 
 
     }
-    public void pc(MenuItem item)
-    {
-        Intent intent= new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse("https://drive.google.com/open?id=1ZKN9MOSQrYP8-g4EYbQiv90Fux8H4a8u"));
-        startActivity(Intent.createChooser(intent,"Download KryTez for PC"));
-    }
     public void start()
     {
         transferLayout.setVisibility(View.GONE);
@@ -552,22 +471,6 @@ public class Krytez_Client extends AppCompatActivity {
     }
 
 
-    public boolean onCreateOptionsMenu(Menu menu){
-        MenuInflater min= getMenuInflater();
-        min.inflate(R.menu.activity_menu,menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-    public void gotoKrytez(MenuItem menu)
-    {
-        Intent intent= new Intent(Intent.ACTION_SEND);
-        intent.setData(Uri.parse("mailto:"));
-        intent.setType("text/plain");
-        String[] mail={"krytez.tech@gmail.com"};
-        intent.putExtra(Intent.EXTRA_SUBJECT,"Feedback for KryTez Share");
-        intent.putExtra(Intent.EXTRA_TEXT,"");
-        intent.putExtra(Intent.EXTRA_EMAIL,mail);
-        startActivity(Intent.createChooser(intent,"Send feedback mail"));
-    }
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -585,9 +488,6 @@ public class Krytez_Client extends AppCompatActivity {
         perc=(TextView) findViewById(R.id.perc);
         trans.setText("Waiting for files");
         perc.setText(0+"%");
-        rg=findViewById(R.id.rgroup);
-        intr= findViewById(R.id.intr);
-        extr=findViewById(R.id.extr);
         int i=0;
         try {
             Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
@@ -615,20 +515,9 @@ public class Krytez_Client extends AppCompatActivity {
             Toast.makeText(Krytez_Client.this,"Error",Toast.LENGTH_LONG).show();
             onBackPressed();
         }
-        dir=getSharedPreferences("directory",MODE_PRIVATE);
+        dir=getSharedPreferences("storage",MODE_PRIVATE);
         direditor=dir.edit();
         String res=dir.getString("directory",null);
-        boolean intrcheck=dir.getBoolean("intr",false);
-        if(intrcheck)
-        {
-            intr.setChecked(true);
-        }
-        else if(dir.getBoolean("extr",false))
-        {
-            extr.setChecked(true);
-        }
-        else
-            intr.setChecked(true);
         if(res!=null);
         else
         {
@@ -644,9 +533,6 @@ public class Krytez_Client extends AppCompatActivity {
             }
             else
             direditor.putString("directory", path);
-
-            direditor.putBoolean("intr",true);
-            direditor.putBoolean("extr",true);
             direditor.commit();
         }
 
