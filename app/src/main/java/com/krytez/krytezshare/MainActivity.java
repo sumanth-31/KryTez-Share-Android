@@ -9,6 +9,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.StrictMode;
+
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,8 +19,8 @@ import android.view.WindowManager;
 
 public class MainActivity extends AppCompatActivity {
 
-    SharedPreferences dontchecker,dir;
-    SharedPreferences.Editor editor,direditor;
+    SharedPreferences dontchecker,settingsPreferences;
+    SharedPreferences.Editor editor,settingsPreferencesEditor;
     boolean closeflag = true;
     int REQ_WRITE = 1;
 
@@ -54,6 +56,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        settingsPreferences=getSharedPreferences("settings",MODE_PRIVATE);
+        settingsPreferencesEditor=settingsPreferences.edit();
+        int theme=settingsPreferences.getInt("theme",-2); //-2 is not found
+        if(theme==-2)
+        {
+            theme= AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+            settingsPreferencesEditor.putInt("theme",theme);
+            settingsPreferencesEditor.commit();
+        }
+        AppCompatDelegate.setDefaultNightMode(theme);
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         StrictMode.ThreadPolicy policy= new StrictMode.ThreadPolicy.Builder().permitAll().build();

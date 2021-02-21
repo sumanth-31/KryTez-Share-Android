@@ -1,11 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item
-        android:onClick="gotoKrytez"
+        android:id="@+id/storage"
+        android:title="Storage Directory">
+        <menu>
+
+            <group
+                android:id="@+id/storageGroup"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/internalStorageRadio"
+                    android:title="Internal Storage" />
+                <item
+                    android:id="@+id/externalStorageRadio"
+                    android:title="External Storage" />
+            </group>
+            <item
+                android:id="@+id/path"
+                android:onClick="displayStoragePath"
+                android:title="Show Storage Path" />
+        </menu>
+    </item>
+    <item android:title="Theme">
+        <menu>
+            <group
+                android:id="@+id/themeGroup"
+                android:checkableBehavior="single"
+                android:visibility="visible">
+                <item
+                    android:id="@+id/lightTheme"
+                    android:title="Light Theme" />
+                <item
+                    android:id="@+id/darkTheme"
+                    android:title="Dark Theme" />
+                <item
+                    android:id="@+id/systemDefaultTheme"
+                    android:title="System Default Theme" />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:onClick="sendFeedback"
         android:title="Send feedback mail" />
     <item
-        android:onClick="pc"
+        android:onClick="downloadPC"
         android:title="KryTez Share for PC" />
 </menu>
