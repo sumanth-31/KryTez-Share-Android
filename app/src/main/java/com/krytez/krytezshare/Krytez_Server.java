@@ -393,6 +393,7 @@ public class Krytez_Server extends BaseActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         try {
                             serv.close();
+                            servs.close();
                         } catch (IOException e) {
                             quitWithError("Couldn't stop server!\nKindly restart app if you need to send again");
                         }

@@ -34,6 +34,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -56,7 +57,7 @@ public class Krytez_Client extends BaseActivity {
     double datad;
     Socket socket;
     boolean startflag=true;
-    boolean perflag=false,finflag=false,initflag=false;
+    boolean perflag=false,initflag=false;
     int data;
     SharedPreferences dir;
     SharedPreferences.Editor direditor;
@@ -114,7 +115,6 @@ public class Krytez_Client extends BaseActivity {
                     {
                         br.close();
                         socket.close();
-                        finflag=true;
                         break;
                     }
                    else if(file.equals("Dir"))
@@ -188,24 +188,24 @@ public class Krytez_Client extends BaseActivity {
                 }
             }catch(NumberFormatException nfe)
             {
+                nfe.printStackTrace();
                 quitWithError("Enter a proper User id and Password!");
-                //nfe.printStackTrace();
 
             }
             catch(java.net.UnknownHostException un)
             {
+                un.printStackTrace();
                 quitWithError("Enter a proper User Id and Password!");
-                //un.printStackTrace();
             }
             catch(java.net.NoRouteToHostException no)
             {
+                no.printStackTrace();
                 quitWithError("There is no active server at the specified User Id!");
-                //no.printStackTrace();
             }
             catch(Exception e)
             {
+                e.printStackTrace();
                 quitWithError("Error occurred!\nTry checking storage permissions or connection\nor available storage.");
-                //e.printStackTrace();
             }
             endtime=System.nanoTime();
             return "Not Yet";
@@ -218,9 +218,6 @@ public class Krytez_Client extends BaseActivity {
 
         }
         protected void onPostExecute(String as) {
-
-            if(finflag)
-            {
                 startflag=true;
                 totaltime=endtime-starttime;
                 double time=totaltime/1000000000.0;
@@ -235,7 +232,7 @@ public class Krytez_Client extends BaseActivity {
                     dialog.setPositiveButton("Roger that!", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            finflag=false;
+                            finish();
                         }
                     });
                     runOnUiThread(new Runnable() {
@@ -253,8 +250,7 @@ public class Krytez_Client extends BaseActivity {
                     dialog.setPositiveButton("Roger that!", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
-                            finflag=false;
+                            finish();
                         }
                     });
                     runOnUiThread(new Runnable() {
@@ -263,8 +259,6 @@ public class Krytez_Client extends BaseActivity {
                             dialog.show();
                         }
                     });
-                }
-                finflag=false;
             }
         }
 
@@ -367,7 +361,7 @@ public class Krytez_Client extends BaseActivity {
 
         }catch(Exception e)
         {
-            //e.printStackTrace();
+            e.printStackTrace();
             quitWithError("Error Occured!");
         }
 
@@ -392,7 +386,7 @@ public class Krytez_Client extends BaseActivity {
         });
     }
     public void onBackPressed(){
-        if(ftp==null || ftp.isCancelled())
+        if(ftp==null)
         {
             finish();
             return;
@@ -403,6 +397,11 @@ public class Krytez_Client extends BaseActivity {
         dialog.setCancelable(false);
         dialog.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            socket.close();
+                        } catch (IOException e) {
+                            //e.printStackTrace();
+                        }
                         ftp.cancel(true);
                         finish();
                     }
@@ -459,18 +458,9 @@ public class Krytez_Client extends BaseActivity {
         else
             perflag=false;
 
-        new Ftp().execute("hi");
-
-
+        ftp=new Ftp();
+        ftp.execute("hi");
     }
-    public void start()
-    {
-        transferLayout.setVisibility(View.GONE);
-        loginLayout.setVisibility(View.VISIBLE);
-        trans.setText("Waiting for files");
-    }
-
-
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
