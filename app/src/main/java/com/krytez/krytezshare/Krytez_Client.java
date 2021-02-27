@@ -50,7 +50,7 @@ public class Krytez_Client extends BaseActivity {
     TextInputEditText ip,portt;
     Button conn,scbtn;
     String file,datas;
-    long starttime,endtime,totaltime,transd,maintrans;
+    long starttime,endtime,totaltime,transd,bytesTransferred;
     ConstraintLayout loginLayout;
     LinearLayout transferLayout;
     Intent intent;
@@ -67,9 +67,10 @@ public class Krytez_Client extends BaseActivity {
     public class Ftp extends AsyncTask<String ,String,String>
     {
         String path;
+        boolean errorFlag;
         protected void onPreExecute()
         {
-
+            errorFlag=true;
             transferLayout.setVisibility(View.VISIBLE);
             loginLayout.setVisibility(View.GONE);
             path=dir.getString("directory",null);
@@ -102,7 +103,7 @@ public class Krytez_Client extends BaseActivity {
                 BufferedReader br;
                  port =Integer.parseInt(portt.getText().toString());
                 transd=0;
-                maintrans=0;
+                bytesTransferred=0;
                 socket = new Socket(ipadd, port);
                 br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 BufferedOutputStream bo = new BufferedOutputStream(socket.getOutputStream());
@@ -167,13 +168,13 @@ public class Krytez_Client extends BaseActivity {
                         publishProgress(file);
                         continue;
                     }
-                    while (((len = is.read(buff)) != -1) &&(!this.isCancelled())) {
+                    while ((len = is.read(buff)) != -1) {
                        fos.write(buff, 0, len);
                        fos.flush();
                         transd+=len;
                         if(transd>=1048576)
                         {
-                            maintrans+=1;
+                            bytesTransferred+=transd;
                             publishProgress(file);
                             transd=0;
                         }
@@ -186,6 +187,7 @@ public class Krytez_Client extends BaseActivity {
                     pw.println("received");
                     publishProgress(file);
                 }
+                errorFlag=false;
             }catch(NumberFormatException nfe)
             {
 //                nfe.printStackTrace();
@@ -213,12 +215,15 @@ public class Krytez_Client extends BaseActivity {
         }
         protected void onProgressUpdate(String... para)
         {
+            final long megaBytesTransferred=bytesTransferred/1048576;
             trans.setText("Transferring file: "+para[0]);
-            perc.setText(maintrans+"MB/"+data+"MB");
-            pb.setProgress((int)maintrans,true);
+            perc.setText(megaBytesTransferred+"MB/"+data+"MB");
+            pb.setProgress((int)megaBytesTransferred,true);
 
         }
         protected void onPostExecute(String as) {
+            if(this.isCancelled() || errorFlag)
+                return;
                 startflag=true;
                 totaltime=endtime-starttime;
                 double time=totaltime/1000000000.0;
@@ -331,7 +336,7 @@ public class Krytez_Client extends BaseActivity {
                     continue;
 
                 }
-                while (((len = is.read(buff)) != -1)&&(!ftp.isCancelled()))
+                while ((len = is.read(buff)) != -1)
                 {
 
                     fos.write(buff, 0, len);
@@ -339,14 +344,14 @@ public class Krytez_Client extends BaseActivity {
                     transd+=len;
                     if(transd>=1048576)
                     {
-                        maintrans+=1;
+                        bytesTransferred+=transd;
+                        final long megaBytesTransferred=bytesTransferred/1048576;
                         runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-
                             trans.setText("Transferring file: "+fname);
-                            perc.setText(maintrans+"MB/"+data+"MB");
-                            pb.setProgress((int)maintrans,true);
+                            perc.setText(megaBytesTransferred+"MB/"+data+"MB");
+                            pb.setProgress((int)megaBytesTransferred,true);
                         }
                     });
                         transd=0;
@@ -376,6 +381,10 @@ public class Krytez_Client extends BaseActivity {
         dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                try{
+                    socket.close();
+                }catch (IOException ex){
+                }
                 ftp.cancel(true);
                 finish();
             }
