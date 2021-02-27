@@ -101,20 +101,21 @@
                 android:onClick="client"
                 android:shadowColor="#161616"
                 android:text="receive"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:cornerRadius="32dp" />
         </LinearLayout>
 
 
         <Button
             android:id="@+id/but"
             android:layout_width="154dp"
-            android:layout_height="43dp"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="28dp"
-            android:layout_marginRight="28dp"
             android:layout_marginBottom="32dp"
             android:onClick="scan"
             android:text="Scan QR Code"
             android:textColor="#FFFF"
+            app:cornerRadius="32dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>

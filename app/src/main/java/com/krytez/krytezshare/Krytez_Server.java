@@ -58,7 +58,7 @@ public class Krytez_Server extends BaseActivity {
     InetAddress ipa;
     boolean initflag=false,initflag1=false,startflag=true,qrflag=true;
     double datad;
-    long trans=0,data=0,starttime,totaltime,maintrans=0;
+    long trans=0,data=0,starttime,totaltime,bytesTransferred=0;
     String fname1;
     LinearLayout infoLayout,transferLayout;
     FtpR asyncTask;
@@ -128,7 +128,7 @@ public class Krytez_Server extends BaseActivity {
                 String fname;
                 int i=0;
                 trans=0;
-                maintrans=0;
+                bytesTransferred=0;
                 datad=data/1000000.0;
                 data/=1000000;
                 runOnUiThread(new Runnable() {
@@ -170,14 +170,14 @@ public class Krytez_Server extends BaseActivity {
                         int len;
                         byte buff[]= new byte[32768];
                         br.readLine();
-                        while(((len=is.read(buff))!=-1)&&(!this.isCancelled()))
+                        while((len=is.read(buff))!=-1)
                         {
                             bo.write(buff,0,len);
                             bo.flush();
                             trans+=len;
                             if(trans>=1048576)
                             {
-                                maintrans+=1;
+                                bytesTransferred+=trans;
                                 publishProgress(fname);
                                 trans=0;
                             }
@@ -245,8 +245,9 @@ public class Krytez_Server extends BaseActivity {
         }
         public void onProgressUpdate(String... f){
             pbtext.setText("Transferring file: "+f[0]);
-            perc.setText(maintrans+"MB/"+data+"MB");
-            pb.setProgress((int)maintrans,true);
+            final long megaBytesTransferred=bytesTransferred/1048576;
+            perc.setText(megaBytesTransferred+"MB/"+data+"MB");
+            pb.setProgress((int)megaBytesTransferred,true);
 
         }
         public void onPostExecute(String f) {
@@ -348,19 +349,20 @@ public class Krytez_Server extends BaseActivity {
                     int len;
                     byte buff[] = new byte[32768];
                     br.readLine();
-                    while (((len = is.read(buff)) != -1)&&(!asyncTask.isCancelled())) {
+                    while ((len = is.read(buff)) != -1) {
                         bo.write(buff, 0, len);
                         bo.flush();
                        trans += len;
                         if (trans >= 1048576) {
-                            maintrans += 1;
+                            bytesTransferred += trans;
+                            final long megaBytesTransferred=bytesTransferred/1048576;
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
 
                                     pbtext.setText("Transferring file: "+fname1);
-                                    perc.setText(maintrans+"MB/"+data+"MB");
-                                    pb.setProgress((int)maintrans,true);
+                                    perc.setText(megaBytesTransferred+"MB/"+data+"MB");
+                                    pb.setProgress((int)megaBytesTransferred,true);
                                 }
                             });
                             trans = 0;

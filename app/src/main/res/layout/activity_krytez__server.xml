@@ -9,13 +9,13 @@
     <Button
         android:id="@+id/button2"
         android:layout_width="173dp"
-        android:layout_height="45dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="29dp"
-        android:layout_marginRight="29dp"
         android:onClick="showQR"
         android:text="Show QR Code"
         android:textColor="#FFFF"
+        app:cornerRadius="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
