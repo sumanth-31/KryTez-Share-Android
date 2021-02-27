@@ -74,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().hide();
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
             setContentView(R.layout.activity_main);
+            if(savedInstanceState!=null)
+                return;
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {

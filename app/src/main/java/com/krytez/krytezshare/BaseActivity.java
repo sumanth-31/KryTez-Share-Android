@@ -158,7 +158,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         storagePreferencesEditor=storagePreferences.edit();
         settingsPreferences=getSharedPreferences("settings",MODE_PRIVATE);
         settingsPreferencesEditor=settingsPreferences.edit();
-        setContentView(R.layout.activity_base);
         String storagePath=storagePreferences.getString("directory",null);
         if(storagePath==null){
             storagePath= Environment.getExternalStorageDirectory().toString()+"/"+"KryTez Share";
